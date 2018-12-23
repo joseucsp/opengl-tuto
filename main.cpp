@@ -3,7 +3,7 @@
 static const GLfloat g_vertex_buffer_data[] = {
    -1.0f, -1.0f, 0.0f,
     1.0f, -1.0f, 0.0f,
-    0.0f,  1.0f, 0.0f,  
+    0.0f,  1.0f, 0.0f,
 };
 
 int main(int argc, char** argv)
@@ -67,18 +67,17 @@ int main(int argc, char** argv)
 	// Model matrix : an identity matrix (model will be at the origin)
     glm::mat4 Model = glm::mat4(1.0f);
     
-    glm::mat4 ScalingMatrix   = glm::scale(glm::mat4(1.0f),glm::vec3(0.8f, 0.8f , 0.8f));
-    Model = ScalingMatrix * Model;
+    glm::mat4 ScalingMatrix   = glm::scale(glm::mat4(1.0f),glm::vec3(1.0f, 1.0f , 1.0f));
+    //Model = ScalingMatrix * Model;
     
     
     glm::vec3 RotationAxis(0.0f, 0.0f, 1.0f);
-    glm::mat4 RotateMatrix = glm::rotate(Model, (glm::mediump_float)M_PI * 1.0f, RotationAxis );
+    glm::mat4 RotationMatrix = glm::rotate(Model, (glm::mediump_float)M_PI * 0.5f, RotationAxis );
 
-    Model = RotateMatrix * Model;
+    //Model = RotationMatrix * Model;
     
-    glm::mat4 TranslateMatrix = glm::translate( Model, glm::vec3(1.0f, 0.0f, 0.0f));
-    Model = TranslateMatrix * Model;
-    
+    glm::mat4 TranslateMatrix = glm::translate( Model, glm::vec3(0.5f, 0.0f, 0.0f));
+    Model = TranslateMatrix * RotationMatrix * ScalingMatrix * Model;
     
 	// Our ModelViewProjection : multiplication of our 3 matrices
     glm::mat4 MVP = Projection * View * Model; // Remember, matrix multiplication is the other way around    
