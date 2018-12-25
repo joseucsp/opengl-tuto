@@ -21,8 +21,13 @@ the position of the vertex for each run of the vertex shader.
 */
 
 layout(location = 0) in vec3 vertexPosition_modelspace;
+layout(location = 1) in vec3 vertexColor;
 
+// Value that stay constant for mesh
 uniform mat4 MVP;
+
+// Output data: will be interpolated for each fragment
+out vec3 fragmentColor;
 
 void main()
 {
@@ -30,5 +35,7 @@ void main()
     // gl_Position.w   = 1.0;
 
     // Output position of the vertex, in clip space : MVP * position
-    gl_Position = MVP * vec4(vertexPosition_modelspace, 1);
+    gl_Position   = MVP * vec4(vertexPosition_modelspace, 1);
+
+    fragmentColor = vertexColor;
 }

@@ -1,9 +1,39 @@
 #include "common/loadshader.hpp"
 
 static const GLfloat g_vertex_buffer_data[] = {
-   -1.0f, -1.0f, 0.0f,
-    1.0f, -1.0f, 0.0f,
-    0.0f,  1.0f, 0.0f,
+   -1.0f, -1.0f,  1.0f,
+    1.0f, -1.0f,  1.0f,
+    1.0f,  1.0f,  1.0f,
+
+    1.0f,  1.0f,  1.0f,
+   -1.0f,  1.0f,  1.0f,
+   -1.0f, -1.0f,  1.0f,    
+
+   -1.0f,  1.0f,  1.0f,
+    1.0f,  1.0f,  1.0f,
+    1.0f,  1.0f, -1.0f,
+
+    1.0f,  1.0f, -1.0f,
+   -1.0f,  1.0f, -1.0f,
+   -1.0f,  1.0f,  1.0f,
+};
+
+static const GLfloat g_color_buffer_data[] = {
+    0.0f,  0.0f,  0.8f,
+    0.0f,  0.0f,  0.4f,
+    0.0f,  0.0f,  0.8f,
+
+    0.0f,  0.0f,  0.8f,
+    0.0f,  0.0f,  0.4f,
+    0.0f,  0.0f,  0.8f,
+
+    0.0f,  0.8f,  0.0f,
+    0.0f,  0.4f,  0.0f,
+    0.0f,  0.8f,  0.0f,
+
+    0.0f,  0.8f,  0.0f,
+    0.0f,  0.4f,  0.0f,
+    0.0f,  0.8f,  0.0f,
 };
 
 int main(int argc, char** argv)
@@ -59,7 +89,7 @@ int main(int argc, char** argv)
     //glm::mat4 Projection = glm::ortho(-10.0f,10.0f,-10.0f,10.0f,0.0f,100.0f); // In world coordinates
 
 	// Camera matrix
-	glm::mat4 View  = glm::lookAt(  glm::vec3(0,0,3), // Camera is at (4,3,3), in World Space
+	glm::mat4 View  = glm::lookAt(  glm::vec3(0,10,10), // Camera is at (4,3,3), in World Space
 								    glm::vec3(0,0,0), // and looks at the origin
 								    glm::vec3(0,1,0)  // Head is up (set to 0,-1,0 to look upside-down)
                                  );
@@ -72,11 +102,11 @@ int main(int argc, char** argv)
     
     
     glm::vec3 RotationAxis(0.0f, 0.0f, 1.0f);
-    glm::mat4 RotationMatrix = glm::rotate(Model, (glm::mediump_float)M_PI * 0.5f, RotationAxis );
+    glm::mat4 RotationMatrix = glm::rotate(Model, (glm::mediump_float)M_PI * 0.0f, RotationAxis );
 
     //Model = RotationMatrix * Model;
     
-    glm::mat4 TranslateMatrix = glm::translate( Model, glm::vec3(0.5f, 0.0f, 0.0f));
+    glm::mat4 TranslateMatrix = glm::translate( Model, glm::vec3(0.0f, 0.0f, 0.0f));
     Model = TranslateMatrix * RotationMatrix * ScalingMatrix * Model;
     
 	// Our ModelViewProjection : multiplication of our 3 matrices
@@ -92,11 +122,19 @@ int main(int argc, char** argv)
                                          g_vertex_buffer_data ,
                                          GL_STATIC_DRAW       );
 
+    GLuint colorbuffer;
+
+    glGenBuffers(1, &colorbuffer);
+    glBindBuffer(GL_ARRAY_BUFFER, colorbuffer);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(g_color_buffer_data),
+                                         g_color_buffer_data ,
+                                         GL_STATIC_DRAW);   
 
 
     do {
         glClear(GL_COLOR_BUFFER_BIT);
-        
+        //glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
         // Use our shader
         glUseProgram(programID);
 
@@ -116,13 +154,26 @@ int main(int argc, char** argv)
             (void*)0    // array buffer offset
         );
 
-        //glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        // 2nd attribute buffer : colors
+        glEnableVertexAttribArray(1);
+        glBindBuffer(GL_ARRAY_BUFFER, colorbuffer);
+        glVertexAttribPointer(
+            1,          // attibute 0, must match the layout in the shader
+            3,          // size
+            GL_FLOAT,   // type
+            GL_FALSE,   // normalizerd?
+            0,          // stride
+            (void*)0    // array buffer offset
+        );
+
         
         // Draw the triangle
         // Starting from vertex 0; 3 vertices total -> 1 triangle
 
-        glDrawArrays(GL_TRIANGLES, 0, 3);         
+        glDrawArrays(GL_TRIANGLES, 0, 3 * 4);         
+        
         glDisableVertexAttribArray(0);
+        glDisableVertexAttribArray(1);
 
         glfwSwapBuffers(window);
         glfwPollEvents();
