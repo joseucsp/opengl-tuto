@@ -1,4 +1,5 @@
 #include "common/loadshader.hpp"
+#include "common/texture.hpp"
 
 static const GLfloat g_vertex_buffer_data[] = {
    -1.0f, -1.0f,  1.0f,
@@ -34,6 +35,21 @@ static const GLfloat g_color_buffer_data[] = {
     0.0f,  0.8f,  0.0f,
     0.0f,  0.4f,  0.0f,
     0.0f,  0.8f,  0.0f,
+};
+
+static const GLfloat g_uv_buffer_data[] = { 
+	0.000059f, 1.0f-0.000004f, 
+	0.000103f, 1.0f-0.336048f, 
+	0.335973f, 1.0f-0.335903f, 
+	1.000023f, 1.0f-0.000013f, 
+	0.667979f, 1.0f-0.335851f, 
+	0.999958f, 1.0f-0.336064f, 
+	0.667979f, 1.0f-0.335851f, 
+	0.336024f, 1.0f-0.671877f, 
+	0.667969f, 1.0f-0.671889f, 
+	1.000023f, 1.0f-0.000013f, 
+    0.668104f, 1.0f-0.000013f,
+    0.667979f, 1.0f-0.335851f
 };
 
 int main(int argc, char** argv)
@@ -89,7 +105,7 @@ int main(int argc, char** argv)
     //glm::mat4 Projection = glm::ortho(-10.0f,10.0f,-10.0f,10.0f,0.0f,100.0f); // In world coordinates
 
 	// Camera matrix
-	glm::mat4 View  = glm::lookAt(  glm::vec3(0,10,10), // Camera is at (4,3,3), in World Space
+	glm::mat4 View  = glm::lookAt(  glm::vec3(0,5,10), // Camera is at (4,3,3), in World Space
 								    glm::vec3(0,0,0), // and looks at the origin
 								    glm::vec3(0,1,0)  // Head is up (set to 0,-1,0 to look upside-down)
                                  );
@@ -111,6 +127,13 @@ int main(int argc, char** argv)
     
 	// Our ModelViewProjection : multiplication of our 3 matrices
     glm::mat4 MVP = Projection * View * Model; // Remember, matrix multiplication is the other way around    
+    
+    
+    GLuint Texture   = loadBMP("uvtemplate.bmp");
+    GLuint TextureID = glGetUniformLocation(programID, "TextureSampler");
+    
+    
+    
     // This will identify our vertex buffer
     GLuint vertexbuffer;
     // Generate 1 buffer, put the resulting identifiers in vertexbuffer
@@ -122,6 +145,7 @@ int main(int argc, char** argv)
                                          g_vertex_buffer_data ,
                                          GL_STATIC_DRAW       );
 
+    /* 
     GLuint colorbuffer;
 
     glGenBuffers(1, &colorbuffer);
@@ -130,7 +154,16 @@ int main(int argc, char** argv)
                                          g_color_buffer_data ,
                                          GL_STATIC_DRAW);   
 
+    */
+    
+    GLuint uvbuffer;
 
+    glGenBuffers(1, &uvbuffer);
+    glBindBuffer(GL_ARRAY_BUFFER, uvbuffer);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(g_uv_buffer_data),
+                                         g_uv_buffer_data ,
+                                         GL_STATIC_DRAW);
+    
     do {
         glClear(GL_COLOR_BUFFER_BIT);
         //glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -156,7 +189,7 @@ int main(int argc, char** argv)
 
         // 2nd attribute buffer : colors
         glEnableVertexAttribArray(1);
-        glBindBuffer(GL_ARRAY_BUFFER, colorbuffer);
+        glBindBuffer(GL_ARRAY_BUFFER, uvbuffer);
         glVertexAttribPointer(
             1,          // attibute 0, must match the layout in the shader
             3,          // size
